@@ -24,11 +24,12 @@ class PessoasController extends Controller
 				return response($data->get(), 200);
 				break;
 			case 'csv':
-				return response('In development', 200)
-						->header('Content-Type', 'text/plain');
+				return response($this->formatToCSV($data->get()), 200)
+						->header('Content-Type', 'text/csv')
+						->header('Content-Disposition', 'attachment; filename="pessoas.csv"');
 				break;
 			case 'html':
-				return response(gettype($data->get()), 200)
+				return response('In development...', 200)
 						->header('Content-Type', 'text/plain');
 				break;
 
@@ -59,7 +60,7 @@ class PessoasController extends Controller
 			$ordenated = $data->orderBy($sort, $order);
 			$ordenated->get(); // Testing if this is a valid ordenation
 		} catch(QueryException $e) {
-			return $data;
+			return $this->getJoinedData();
 		}
 
 		return $data;
@@ -79,5 +80,26 @@ class PessoasController extends Controller
 					'movies.year as movieYear',
 					'movies.rtrate as rtScore'
 		);
+	}
+
+	private function formatToCSV($data) {
+		$keys = array_keys(get_object_vars($data[0]));
+		$header = '';
+		foreach ($keys as $value) {
+			$header .= $value.';';
+		}
+		$header = substr($header, 0, -1); // Removing last ';'
+		$header .= "\n";
+
+		$body = '';
+		foreach ($data as $char) {
+			foreach (get_object_vars($char) as $value) {
+				$body .= $value.';';
+			}
+			$body = substr($body, 0, -1); // Removing last ';'
+			$body .= "\n";
+		}
+
+		return $header.$body;
 	}
 }
