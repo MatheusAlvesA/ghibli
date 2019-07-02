@@ -12,5 +12,7 @@ class Movie extends Model
 	public $incrementing = false;  // This key is not auto incrementing
 	protected $keyType = 'string'; // The type of the primary key is string
 
+	public $timestamps = false;
+
 	protected $fillable = ['id', 'name', 'description', 'director', 'producer', 'year', 'rtrate'];
 }

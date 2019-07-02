@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Crawler;
 
 class CrawlData extends Command
 {
@@ -38,6 +39,14 @@ class CrawlData extends Command
     public function handle()
     {
 		$this->info('Crawling data from the API...');
-        //
+
+		$movies = Crawler::getAllMovies();
+		$characters = Crawler::getAllPeople();
+		Crawler::setMoviesOnDatabase($movies);
+		Crawler::setPeopleOnDatabase($characters);
+
+		Crawler::relationate($movies, $characters);
+
+		$this->info('Success !!!');
     }
 }
