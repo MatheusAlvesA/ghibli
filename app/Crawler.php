@@ -3,6 +3,8 @@
 namespace App;
 
 use DB;
+use App\Model\Character;
+use App\Model\Movie;
 
 class Crawler
 {
