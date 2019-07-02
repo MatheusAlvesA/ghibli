@@ -18,18 +18,20 @@ class PessoasController extends Controller
 		$fmt = $r->query('fmt');
 
 		$data = $this->getOrdenatedData($r);
+		$parsed = $this->parseToArray($data);
+		$filtered = $this->applyFilter($parsed, $r);
 
 		switch ($fmt) {
 			case 'json':
-				return response($data->get(), 200);
+				return response($filtered, 200);
 				break;
 			case 'csv':
-				return response($this->formatToCSV($data->get()), 200)
+				return response($this->formatToCSV($filtered), 200)
 						->header('Content-Type', 'text/csv')
 						->header('Content-Disposition', 'attachment; filename="pessoas.csv"');
 				break;
 			case 'html':
-				return view('pessoas', ['data' => $data->get()]);
+				return view('pessoas', ['data' => $filtered]);
 				break;
 
 			default:
@@ -38,6 +40,48 @@ class PessoasController extends Controller
 				break;
 		}
 
+	}
+
+	
+	/**
+	*	Returns all data filtred by the user request
+	*/
+	private function applyFilter($data, $r) {
+		$filter = $r->query('filter');
+		if($filter === null || $filter === '') {
+			return $data;
+		}
+		$splited = explode(':', $filter);
+		if(count($splited) !== 2) {
+			return $data;
+		}
+
+		$key = $splited[0];
+		$value = $splited[1];
+
+		$filtered = [];
+		foreach ($data as $char) {
+			if(!array_key_exists($key, $char)) {
+				return $data;
+			}
+
+			if($char[$key] === $value) {
+				array_push($filtered, $char);
+			}
+		}
+
+		return $filtered;
+	}
+
+	/**
+	 * Parses a Collection to a associative array
+	*/
+	private function parseToArray($data) {
+		$r = [];
+		foreach ($data->get() as $value) {
+			array_push($r, get_object_vars($value));
+		}
+		return $r;
 	}
 
 	/**
@@ -58,6 +102,7 @@ class PessoasController extends Controller
 		try {
 			$ordenated = $data->orderBy($sort, $order);
 			$ordenated->get(); // Testing if this is a valid ordenation
+			return $ordenated;
 		} catch(QueryException $e) {
 			return $this->getJoinedData();
 		}
@@ -73,8 +118,8 @@ class PessoasController extends Controller
 		->join('movies_characters', 'characters.id', '=', 'movies_characters.character_id')
 		->join('movies', 'movies.id', '=', 'movies_characters.movie_id')
 		->select(
-					'characters.name',
-					'characters.age',
+					'characters.name as name',
+					'characters.age as age',
 					'movies.name as movieName',
 					'movies.year as movieYear',
 					'movies.rtrate as rtScore'
@@ -82,7 +127,7 @@ class PessoasController extends Controller
 	}
 
 	private function formatToCSV($data) {
-		$keys = array_keys(get_object_vars($data[0]));
+		$keys = array_keys($data[0]);
 		$header = '';
 		foreach ($keys as $value) {
 			$header .= $value.';';
@@ -92,7 +137,7 @@ class PessoasController extends Controller
 
 		$body = '';
 		foreach ($data as $char) {
-			foreach (get_object_vars($char) as $value) {
+			foreach ($char as $value) {
 				$body .= $value.';';
 			}
 			$body = substr($body, 0, -1); // Removing last ';'

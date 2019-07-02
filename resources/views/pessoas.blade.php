@@ -40,11 +40,11 @@
 							@foreach ($data as $char)
 								<tr>
 								<th scope="row">{{$loop->index +1}}</th>
-									<td>{{$char->name}}</td>
-									<td>{{$char->age}}</td>
-									<td>{{$char->movieName}}</td>
-									<td>{{$char->movieYear}}</td>
-									<td>{{$char->rtScore}}</td>
+									<td>{{$char['name']}}</td>
+									<td>{{$char['age']}}</td>
+									<td>{{$char['movieName']}}</td>
+									<td>{{$char['movieYear']}}</td>
+									<td>{{$char['rtScore']}}</td>
 								 </tr>
 							@endforeach
 						</tbody>
