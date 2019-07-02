@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Database\QueryException;
 use DB;
 
 class PessoasController extends Controller
@@ -15,16 +16,19 @@ class PessoasController extends Controller
     public function show(Request $r)
     {
 		$fmt = $r->query('fmt');
+
+		$data = $this->getOrdenatedData($r);
+
 		switch ($fmt) {
 			case 'json':
-				return response($this->getJoinedData()->get(), 200);
+				return response($data->get(), 200);
 				break;
 			case 'csv':
 				return response('In development', 200)
 						->header('Content-Type', 'text/plain');
 				break;
 			case 'html':
-				return response('In development', 200)
+				return response(gettype($data->get()), 200)
 						->header('Content-Type', 'text/plain');
 				break;
 
@@ -34,6 +38,31 @@ class PessoasController extends Controller
 				break;
 		}
 
+	}
+
+	/**
+	*	Returns all data ordenated by the user request
+	*/
+	private function getOrdenatedData($r) {
+		$sort = $r->query('sort');
+		$order = $r->query('order');
+		$data = $this->getJoinedData();
+		if($sort === null) {
+			return $data;
+		}
+
+		if($order !== 'desc' && $order !== 'asc') {
+			$order = 'desc'; // Default ordening
+		}
+
+		try {
+			$ordenated = $data->orderBy($sort, $order);
+			$ordenated->get(); // Testing if this is a valid ordenation
+		} catch(QueryException $e) {
+			return $data;
+		}
+
+		return $data;
 	}
 	
 	/**
