@@ -29,8 +29,7 @@ class PessoasController extends Controller
 						->header('Content-Disposition', 'attachment; filename="pessoas.csv"');
 				break;
 			case 'html':
-				return response('In development...', 200)
-						->header('Content-Type', 'text/plain');
+				return view('pessoas', ['data' => $data->get()]);
 				break;
 
 			default:
