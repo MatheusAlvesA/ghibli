@@ -1,5 +1,8 @@
 <?php
 
+use App\Model\Character;
+use App\Http\Resources\Pessoas;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -11,6 +14,5 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/pessoas', 'PessoasController@show');
+
