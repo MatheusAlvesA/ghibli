@@ -146,6 +146,8 @@ class PessoasController extends Controller
 	/**
 	 * Formats the data of characters on a CSV
 	 * 
+	 * @param Array $data
+	 * 
 	 * @return String
 	*/
 	private function formatToCSV($data) {
