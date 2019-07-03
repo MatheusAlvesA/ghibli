@@ -10,24 +10,44 @@ class Crawler
 {
 	const ENDPOINT = 'https://ghibliapi.herokuapp.com/';
 
+	/**
+	 * Get data about movies from the endpoin
+	 * 
+	 * @return Array
+	*/
 	static function getAllMovies() {
 		$raw = \file_get_contents(Crawler::ENDPOINT.'films/?limit=250');
 		$data = \json_decode($raw, true);
 		return $data;
 	}
 
+	/**
+	 * Get data about characters from the endpoin
+	 * 
+	 * @return Array
+	*/
 	static function getAllPeople() {
 		$raw = \file_get_contents(Crawler::ENDPOINT.'people/?limit=250');
 		$data = \json_decode($raw, true);
 		return $data;
 	}
 
+	/**
+	 * Insert all movies in the $movies in the database
+	 * 
+	 * @param Array $movies
+	*/
 	static function setMoviesOnDatabase($movies) {
 		foreach($movies as $movie) {
 			Crawler::insertMovieIfNotExists($movie);
 		}
 	}
 
+	/**
+	 * Insert a movie in the database only if it not exists
+	 * 
+	 * @param Array $movie
+	*/
 	static private function insertMovieIfNotExists($movie) {
 		$r = Movie::where('id', $movie['id'])->get();
 		if(count($r) === 0) {
@@ -39,16 +59,26 @@ class Crawler
 				'producer'		=> $movie['producer'],
 				'year'			=> $movie['release_date'],
 				'rtrate'		=> $movie['rt_score'],
-				]);
+			]);
 		}
 	}
 
+	/**
+	 * Insert all characteres in the $characters in the database
+	 * 
+	 * @param Array $characters
+	*/
 	static function setPeopleOnDatabase($characters) {
 		foreach($characters as $char) {
 			Crawler::insertCharIfNotExists($char);
 		}
 	}
 
+	/**
+	 * Insert a movie in the database only if it not exists
+	 * 
+	 * @param Array $char
+	*/
 	static private function insertCharIfNotExists($char) {
 		$r = Character::where('id', $char['id'])->get();
 		if(count($r) === 0) {
@@ -59,10 +89,17 @@ class Crawler
 				'age'			=> $char['age'],
 				'eye_color'		=> $char['eye_color'],
 				'hair_color'	=> $char['hair_color'],
-				]);
+			]);
 		}
 	}
 
+	/**
+	 * Fullfil the movies_characteres table with the relational data
+	 * about movies and characteres
+	 * 
+	 * @param Array $movies
+	 * @param Array $characteres
+	*/
 	static function relationate($movies, $characters) {
 		$relationateds = [];
 		foreach($movies as $movie) {
@@ -102,9 +139,19 @@ class Crawler
 		}
 	}
 
+	/**
+	 * Check if the new relation is already set
+	 * 
+	 * @param Array $all
+	 * @param Array $new
+	 * 
+	 * @return Bool
+	*/
 	static private function alreadyRelated($all, $new) {
 		foreach($all as $relation) {
+			// If it is a object
 			if(\gettype($relation) === 'object') {
+				// Convert in associative array
 				$relation = [
 								'movie_id' => $relation->movie_id,
 								'character_id' => $relation->character_id
@@ -119,6 +166,13 @@ class Crawler
 		return false;
 	}
 
+	/**
+	 * Get all characters id that is in the movie
+	 * 
+	 * @param Array $movie
+	 * 
+	 * @return Array
+	*/
 	static function extractCharsFromMovies($movie) {
 		$characters = [];
 		foreach($movie['people'] as $char) {
@@ -131,6 +185,13 @@ class Crawler
 		return $characters;
 	}
 
+	/**
+	 * Get all characters id that is in the movie
+	 * 
+	 * @param Array $chars
+	 * 
+	 * @return Array
+	*/
 	static function extractMoviesFromChars($chars) {
 		$movies = [];
 		foreach($chars['films'] as $movie) {

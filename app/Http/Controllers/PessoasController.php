@@ -12,6 +12,10 @@ class PessoasController extends Controller
 {
     /**
      * Show all the characters and movies
+	 * 
+	 * @param Request $r
+	 * 
+	 * @return Pesponse
      */
     public function show(Request $r)
     {
@@ -42,17 +46,22 @@ class PessoasController extends Controller
 
 	}
 
-	
 	/**
 	*	Returns all data filtred by the user request
+	*
+	*	@param Array $data
+	*	@param Request $r
+	*	
+	*	@return Array
 	*/
 	private function applyFilter($data, $r) {
 		$filter = $r->query('filter');
 		if($filter === null || $filter === '') {
 			return $data;
 		}
+	
 		$splited = explode(':', $filter);
-		if(count($splited) !== 2) {
+		if(count($splited) !== 2) { // Invalid query
 			return $data;
 		}
 
@@ -61,8 +70,9 @@ class PessoasController extends Controller
 
 		$filtered = [];
 		foreach ($data as $char) {
+			 // If the key does not exists
 			if(!array_key_exists($key, $char)) {
-				return $data;
+				return $data; // Stop filtering and return all data
 			}
 
 			if($char[$key] === $value) {
@@ -75,6 +85,9 @@ class PessoasController extends Controller
 
 	/**
 	 * Parses a Collection to a associative array
+	 * 
+	 * @param Collection $data
+	 * @return Array
 	*/
 	private function parseToArray($data) {
 		$r = [];
@@ -86,6 +99,8 @@ class PessoasController extends Controller
 
 	/**
 	*	Returns all data ordenated by the user request
+	* 	
+	*	@return Collection
 	*/
 	private function getOrdenatedData($r) {
 		$sort = $r->query('sort');
@@ -112,6 +127,8 @@ class PessoasController extends Controller
 	
 	/**
      * Gets and joins all character data and your movies
+	 * 
+	 * @return Collection
      */
 	private function getJoinedData() {
 		return DB::table('characters')
@@ -126,7 +143,15 @@ class PessoasController extends Controller
 		);
 	}
 
+	/**
+	 * Formats the data of characters on a CSV
+	 * 
+	 * @return String
+	*/
 	private function formatToCSV($data) {
+		if(count($data) <= 0) {
+			return '';
+		}
 		$keys = array_keys($data[0]);
 		$header = '';
 		foreach ($keys as $value) {

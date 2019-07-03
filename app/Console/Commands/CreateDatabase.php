@@ -13,7 +13,7 @@ class CreateDatabase extends Command
      *
      * @var string
      */
-    protected $signature = 'createDatabase';
+    protected $signature = 'mysql:createDB';
 
     /**
      * The console command description.

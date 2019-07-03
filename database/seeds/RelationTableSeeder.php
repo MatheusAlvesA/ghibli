@@ -25,6 +25,7 @@ class RelationTableSeeder extends Seeder
 		$bigestTable = $charactersIds;
 		$smallerTableKey = 'movie_id';
 		$bigestTableKey = 'character_id';
+
 		if(count($moviesIds) >= count($charactersIds)) {
 			$smallerTable = $charactersIds;
 			$bigestTable = $moviesIds;
